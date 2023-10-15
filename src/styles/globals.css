@@ -2,26 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+/* html body */
+@layer base{
+    body{
+        @apply bg-[#141414] text-[white] !scrollbar-thin !scrollbar-track-transparent !scrollbar-thumb-[#E10856]
+   }
+    header{
+        @apply fixed top-0 z-50 flex w-full items-center justify-between px-4 py-4 transition-all lg:px-10
+    }
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+    
+/* Custom class name */
+@layer components {
+    .navLinks {
+        @apply cursor-pointer text-sm font-light text-[#fff] hover:text-[#b3b3b3]; 
+    }
+    .input{
+        @apply w-full rounded bg-[#333] px-5 py-4 placeholder-[gray] outline-none focus:bg-[#454545]
+    }
+    .modalBtn{
+        @apply flex h-11 w-11 items-center justify-center rounded-full border-2 border-[gray] bg-[#2a2a2a]/60 hover:bg-white/10 hover:border-white transition-all
+    }
 }
