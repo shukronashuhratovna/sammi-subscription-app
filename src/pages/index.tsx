@@ -1,17 +1,20 @@
 import Head from "next/head";
-import { Header, Hero, Modal, Row } from "src/components";
+import { Header, Hero, Modal, Row, SubscriptionPlan } from "src/components";
 import { API_REQUEST } from "src/services/api.service";
-import { IMovie } from "src/interfaces/app.interface";
+import { IMovie, MyList, Product } from "src/interfaces/app.interface";
 import { GetServerSideProps } from "next";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { AuthContext } from "src/context/auth.context";
 import { useInfoStore } from "src/store";
+import { getList } from "src/helpers/getLists";
 
 
-export default function Home({ trending, top_rated, animation }: HomeProps): JSX.Element {
+export default function Home({ trending, top_rated, animation, products, subscription, myList }: HomeProps): JSX.Element {
   const { isOpenModal } = useInfoStore();
-  const { isLoading } = useContext(AuthContext);
-  if (isLoading) return <>{null}</>
+
+  if (!subscription.length)
+    return <SubscriptionPlan products={products} />
+
   return (
     <div className={`relative min-h-screen ${isOpenModal && '!h-screen overflow-hidden'}`}>
       <Head>
@@ -26,6 +29,7 @@ export default function Home({ trending, top_rated, animation }: HomeProps): JSX
           <Row movie={top_rated} title={'Top Rated'} />
           <Row movie={trending} title={'TV Shows'} isBig={true} />
           <Row movie={animation} title={'Animation'} />
+          <Row movie={myList} title={'My Favourite List'} />
         </section>
       </main>
       <Modal />
@@ -33,17 +37,30 @@ export default function Home({ trending, top_rated, animation }: HomeProps): JSX
   )
 }
 
-export const getServerSideProps: GetServerSideProps<HomeProps> = async () => {
-  const [trending, top_rated, animation] = await Promise.all([
+export const getServerSideProps: GetServerSideProps<HomeProps> = async ({ req }) => {
+  const user_id = req.cookies.user_id;
+
+  if (!user_id) {
+    return { redirect: { destination: '/auth', permanent: false }, };
+  }
+  const [trending, top_rated, animation, products, subscription] = await Promise.all([
     fetch(API_REQUEST.trending).then(res => res.json()),
     fetch(API_REQUEST.top_rated).then(res => res.json()),
-    fetch(API_REQUEST.animation).then(res => res.json())
-  ])
+    fetch(API_REQUEST.animation).then(res => res.json()),
+    fetch(API_REQUEST.products_list).then(res => res.json()),
+    fetch(`${API_REQUEST.subscription}/${user_id}`).then(res => res.json()),
+  ]);
+
+  const myList: MyList[] = await getList(user_id);
+
   return {
     props: {
       trending: trending.results,
       top_rated: top_rated.results,
-      animation: animation.results
+      animation: animation.results,
+      products: products.products.data,
+      subscription: subscription.subscription?.data,
+      myList: myList.map(c => c.product),
     },
   };
 };
@@ -52,4 +69,7 @@ interface HomeProps {
   trending: IMovie[]
   top_rated: IMovie[]
   animation: IMovie[]
+  products: Product[]
+  subscription: string[]
+  myList: IMovie[]
 }

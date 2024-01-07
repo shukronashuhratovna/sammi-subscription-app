@@ -4,25 +4,23 @@ import { useContext, useState } from "react"
 import { TextField } from "src/components";
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import { AuthContext } from "src/context/auth.context";
-import { useRouter } from "next/router";
+import { useAuth } from "src/hooks/useAuth";
+import { GetServerSideProps } from "next";
 
 const Auth = () => {
     const [auth, setAuth] = useState<'Sign In' | 'Sign Up'>('Sign In');
-    const { error, isLoading, signin, signup, user } = useContext(AuthContext);
-    const router = useRouter();
-
-    if (user) { router.push('/'); return <>Loading...</> }
+    const { error, isLoading, signin, signup } = useAuth();
 
     const toggleAuth = (state: 'Sign In' | 'Sign Up') => {
         setAuth(state)
     }
 
-    const onSubmit = (formData: { email: string, password: string }) => {
+    const onSubmit = async (formData: { email: string, password: string }) => {
         if (auth === 'Sign In')
             signin(formData.email, formData.password);
-        else
+        else {
             signup(formData.email, formData.password);
+        }
     }
 
     const validation = Yup.object({
@@ -35,6 +33,7 @@ const Auth = () => {
             <Head>
                 <title>Auth</title>
                 <meta name='decription' content="For watching movies you sgould sign to app" />
+                <link rel='icon' href='/logo.svg' />
             </Head>
             <Image src={'https://rb.gy/5mny7'} alt='bg' fill
                 className="object-cover -z-10 !hidden sm:!inline opacity-60" />
@@ -68,3 +67,10 @@ const Auth = () => {
 }
 
 export default Auth
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+    const user_id = req.cookies.user_id;
+
+    if (user_id)
+        return { redirect: { destination: '/', permanent: false } }
+    return { props: {} }
+}

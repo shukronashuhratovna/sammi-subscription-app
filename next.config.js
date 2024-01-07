@@ -4,6 +4,7 @@ const nextConfig = {
   images: {
         domains: ['image.tmdb.org','rb.gy']
   },
+  
 }
 
 module.exports = nextConfig

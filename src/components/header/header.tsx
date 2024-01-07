@@ -4,12 +4,12 @@ import { CiSearch, CiLogout } from 'react-icons/ci'
 import { BsBell } from 'react-icons/bs'
 import Link from "next/link"
 import { useEffect, useState, useContext } from "react"
-import { AuthContext } from "src/context/auth.context"
+import { useAuth } from "src/hooks/useAuth"
+import NavMenu from "../nav-menu/nav-menu"
 
 const Header = () => {
     const [scrolled, setScrolled] = useState(false)
-    const { logout } = useContext(AuthContext);
-
+    const { logout } = useAuth()
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 0) {
@@ -28,6 +28,7 @@ const Header = () => {
         <header className={`${scrolled && 'bg-[#E10856] shadow-lg'}`} >
             <div className="flex items-center space-x-2 md:space-x-16">
                 <Image src={'/logo.svg'} width={56} height={56} alt="logo" className="cursor-pointer object-contain" />
+                <NavMenu />
                 <ul className="space-x-4 md:flex hidden">
                     <li className="navLinks">Home</li>
                     <li className="navLinks">Movies</li>
